@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/activity_main_menu_item_log_out"
+        android:icon="@android:drawable/ic_lock_power_off"
+        android:title="@string/log_out"
+        />
+    <item
+        android:id="@+id/activity_main_menu_item_username"
+        android:title="Username"
+        app:showAsAction="ifRoom"
+        />
+</menu>

@@ -1,0 +1,8 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <item name="percentage30" type="dimen">30%</item>
+    <item name="percentage40" type="dimen">40%</item>
+    <item name="percentage90" type="dimen">90%</item>
+</resources>

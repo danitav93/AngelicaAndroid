@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="10"
+    tools:context="com.example.danieletavernelli.angelica.activity.MainActivity">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="3dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="2"
+        tools:ignore="UselessParent">
+
+
+
+
+        <SearchView
+            android:id="@+id/activity_main_search_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/activity_main_result_rel_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:layout_weight="8"
+        tools:ignore="UselessParent"
+        android:background="@color/white">
+
+        <TextView
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Risultato della ricerca"
+            android:layout_gravity="center"
+            android:textSize="20sp"/>
+
+        <ListView
+            android:id="@+id/activity_main_result_list_view"
+            android:layout_marginTop="20dp"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:textSize="18sp"/>
+
+
+
+
+    </LinearLayout>
+
+
+</LinearLayout>
