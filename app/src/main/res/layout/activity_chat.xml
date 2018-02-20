@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.danieletavernelli.angelica.activity.ChatActivity">
+
+    <android.support.design.widget.AppBarLayout
+        app:theme="@style/ChatActivityBarTheme"
+        android:id="@+id/activity_chat_app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <android.support.v7.widget.Toolbar
+            app:theme="@style/ChatActivityBarTheme"
+            android:id="@+id/activity_chat_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <com.stfalcon.chatkit.messages.MessagesList
+        android:id="@+id/activity_chat_messagesList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/activity_chat_app_bar"
+        android:layout_above="@+id/activity_chat_input"
+        app:outcomingDefaultBubbleColor="@color/red_dark"
+        />
+
+
+
+
+    <com.stfalcon.chatkit.messages.MessageInput
+        android:background="@drawable/rectangle_top"
+        android:id="@id/activity_chat_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:inputButtonDefaultBgColor="@color/red_dark"
+        app:inputHint="@string/hint_enter_a_message"/>
+
+
+
+</RelativeLayout>

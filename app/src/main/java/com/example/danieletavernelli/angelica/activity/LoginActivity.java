@@ -30,13 +30,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.danieletavernelli.angelica.R;
+import com.example.danieletavernelli.angelica.Singleton.UserSingleton;
 import com.example.danieletavernelli.angelica.entity.ViewUtente;
 import com.example.danieletavernelli.angelica.rest.service.GitHubService;
 import com.example.danieletavernelli.angelica.utility.Constants;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.DialogMethods;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.IntentMethods;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.KeyboardMethods;
-import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.ToastMethods;
 
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
@@ -56,7 +56,6 @@ import static android.Manifest.permission.READ_CONTACTS;
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
     //constants
-    public static final String VIEW_UTENTE_EXTRA_TAG = "VIEW_UTENTE";
     public static final String ACTION_CHANGE_ACTIVITY = "CHANGE_ACTIVITY";
 
     /**
@@ -367,8 +366,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             if (success) {
                 Log.i(TAG, "Utente loggato: " + viewUtente.toString());
-                ToastMethods.showShortToast(activity, "Login avvenuta con successo");
-                IntentMethods.startActivityWithExtraFinishActual(activity,MainActivity.class,VIEW_UTENTE_EXTRA_TAG,viewUtente,ACTION_CHANGE_ACTIVITY);
+                IntentMethods.startActivityFinishActual(activity,MainActivity.class);
+                UserSingleton.getInstance().setViewUtente(viewUtente);
             } else {
                 if (response != null) {
                     if (response.code() == HttpURLConnection.HTTP_NO_CONTENT) {

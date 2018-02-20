@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    android:orientation="horizontal"
+    android:weightSum="10">
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="2">
+        <ImageView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_centerInParent="true"
+            android:id="@+id/chat_list_view_row_profile_image_viw"
+            android:contentDescription="@null"
+            android:tint="@color/red_dark"
+            />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="6.5"
+        >
+
+        <TextView
+            android:layout_marginTop="10dp"
+            android:id="@+id/chat_list_view_row_name_user_txt_viw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="21sp"
+            android:textColor="@color/black"
+            />
+
+        <TextView
+            android:layout_below="@id/chat_list_view_row_name_user_txt_viw"
+            android:id="@+id/chat_list_view_row_desc_role_user_txt_viw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/red_dark"/>
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/chat_list_view_row_stato_img_viw"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.5"
+        tools:ignore="ContentDescription" />
+
+</LinearLayout>

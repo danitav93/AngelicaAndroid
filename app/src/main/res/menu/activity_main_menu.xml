@@ -8,6 +8,6 @@
     <item
         android:id="@+id/activity_main_menu_item_username"
         android:title="Username"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         />
 </menu>

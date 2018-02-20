@@ -1,5 +1,7 @@
 package com.example.danieletavernelli.angelica.entity;
 
+import com.stfalcon.chatkit.commons.models.IUser;
+
 import java.io.Serializable;
 
 /**
@@ -10,8 +12,8 @@ import java.io.Serializable;
 public class ViewUtente implements Serializable {
 
 
-    private Long id_utente,id_ruolo;
-    private String username,password,nome_ruolo;
+    private Long id_utente, idRuolo;
+    private String username,password,nome_ruolo,descFunc;
 
     public ViewUtente() {
         super();
@@ -22,10 +24,10 @@ public class ViewUtente implements Serializable {
         this.password = password;
     }
 
-    public ViewUtente(Long id_ruolo, String username, String password,
+    public ViewUtente(Long idRuolo, String username, String password,
                       String nome_ruolo) {
         super();
-        this.id_ruolo = id_ruolo;
+        this.idRuolo = idRuolo;
         this.username = username;
         this.password = password;
         this.nome_ruolo = nome_ruolo;
@@ -33,11 +35,11 @@ public class ViewUtente implements Serializable {
 
 
 
-    public ViewUtente(Long id_utente, Long id_ruolo, String username,
+    public ViewUtente(Long id_utente, Long idRuolo, String username,
                       String password, String nome_ruolo) {
         super();
         this.id_utente = id_utente;
-        this.id_ruolo = id_ruolo;
+        this.idRuolo = idRuolo;
         this.username = username;
         this.password = password;
         this.nome_ruolo = nome_ruolo;
@@ -51,12 +53,12 @@ public class ViewUtente implements Serializable {
         this.id_utente = id_utente;
     }
 
-    public Long getId_ruolo() {
-        return id_ruolo;
+    public Long getIdRuolo() {
+        return idRuolo;
     }
 
-    public void setId_ruolo(Long id_ruolo) {
-        this.id_ruolo = id_ruolo;
+    public void setIdRuolo(Long idRuolo) {
+        this.idRuolo = idRuolo;
     }
 
     public String getUsername() {
@@ -83,9 +85,18 @@ public class ViewUtente implements Serializable {
         this.nome_ruolo = nome_ruolo;
     }
 
+    public String getDescFunc() {
+        return descFunc;
+    }
+
+    public void setDescFunc(String descFunc) {
+        this.descFunc = descFunc;
+    }
+
     @Override
     public String toString() {
         return "id: "+getId_utente()+"; username: "+getUsername();
     }
+
 
 }

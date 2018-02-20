@@ -76,7 +76,7 @@ public class CollocazioniProvider extends ContentProvider {
 
             GitHubService service = retrofit.create(GitHubService.class);
 
-            Call<List<Collocazione>> call = service.getPageCollocazione(1,10,query);
+            Call<List<Collocazione>> call = service.getPageCollocazione(1,5,query);
 
             Response<List<Collocazione>> response = call.execute();
 

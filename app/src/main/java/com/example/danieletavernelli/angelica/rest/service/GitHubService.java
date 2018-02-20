@@ -1,6 +1,7 @@
 package com.example.danieletavernelli.angelica.rest.service;
 
 import com.example.danieletavernelli.angelica.entity.Collocazione;
+import com.example.danieletavernelli.angelica.entity.Messaggio;
 import com.example.danieletavernelli.angelica.entity.ViewUtente;
 import com.example.danieletavernelli.angelica.utility.Constants;
 
@@ -27,5 +28,14 @@ public interface GitHubService {
     Call<List<Collocazione>> getPageCollocazione(@Query("page") int page,
                                                 @Query("size") int size,
                                                 @Query("collocazione") String collocazione );
+
+    @GET(Constants.USER_LIST_FOR_MESSAGE_PATH)
+    Call<List<ViewUtente>> getUserListForMessage(@Query("id_utente") long id_utente);
+
+    @GET(Constants.CHAT_PATH)
+    Call<List<Messaggio>> getChat(@Query("page") int page,
+                                  @Query("size") int size,
+                                  @Query("id_mittente") long id_mittente,
+                                  @Query("id_destinatario") long id_destinatario);
 
 }

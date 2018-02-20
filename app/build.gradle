@@ -28,5 +28,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-jackson:2.3.0'
-    compile 'com.github.danitav93:LibreriaDiDanieleTavernelli:0.12'
+    compile 'com.github.danitav93:LibreriaDiDanieleTavernelli:0.16'
+    compile 'com.github.stfalcon:chatkit:0.2.2'
 }

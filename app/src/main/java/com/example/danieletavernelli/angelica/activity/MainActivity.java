@@ -1,105 +1,55 @@
 package com.example.danieletavernelli.angelica.activity;
 
-import android.app.SearchManager;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.SearchView;
 
 import com.example.danieletavernelli.angelica.R;
-import com.example.danieletavernelli.angelica.entity.ViewUtente;
-import com.example.danieletavernelli.angelica.utility.AppMethods;
+import com.example.danieletavernelli.angelica.Singleton.UserSingleton;
+import com.example.danieletavernelli.angelica.adapter.MainActivityFragmentAdapter;
+import com.example.danieletavernelli.angelica.fragment.CollocazioneFragment;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.IntentMethods;
+import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.KeyboardMethods;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.ToastMethods;
 
-import java.util.ArrayList;
-
+//fragment for search collcoazioni
 public class MainActivity extends AppCompatActivity {
 
-    private ViewUtente viewUtente;
+    Context context =this;
 
-    private LinearLayout resultlayout;
+    private MainActivityFragmentAdapter mainActivityFragmentAdapter;
 
-    private ListView resultListView;
+    private ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
 
-        //handle intent for search view
-        handleIntent(getIntent());
+        setToolbar();
 
-        //setData
         setData();
 
-        //setSearchView
-        setSearchView();
-
-        //setVisibilities
-        setVisibilities();
-
-
 
 
 
     }
 
+    //setToolbar
+    private void setToolbar() {
 
-
-    private void setVisibilities() {
-        resultlayout.setVisibility(View.INVISIBLE);
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        // Because this activity has set launchMode="singleTop", the system calls this method
-        // to deliver the intent if this activity is currently the foreground activity when
-        // invoked again (when the user executes a search from this activity, we don't create
-        // a new instance of this activity, so the system delivers the search intent here)
-        handleIntent(intent);
-    }
-
-    /**
-     * handle intent for search view
-     */
-    private void handleIntent(Intent intent) {
-
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            // Handle the normal search query case
-            ToastMethods.showShortToast(this,"Selezionare una collocazione dalla lista.");
-
-        } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-
-            // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
-            Uri data = intent.getData();
-
-            showResult(data);
-
-        }
-
-    }
-
-    /**
-     * show result after selection di una collocazione
-     */
-    private void showResult(Uri data) {
-
-        resultlayout.setVisibility(View.VISIBLE);
-
-        ((ArrayAdapter)resultListView.getAdapter()).clear();
-        ((ArrayAdapter<String>)resultListView.getAdapter()).addAll(AppMethods.getCollocazioneResultFromUriIntent(data.toString()));
-        ((ArrayAdapter) resultListView.getAdapter()).notifyDataSetChanged();
+        setSupportActionBar((Toolbar) findViewById(R.id.activity_main_toolbar));
 
     }
 
@@ -110,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_main_menu, menu);
-        menu.findItem(R.id.activity_main_menu_item_username).setTitle(viewUtente.getUsername());
+        menu.findItem(R.id.activity_main_menu_item_username).setTitle(UserSingleton.getInstance().getViewUtente().getUsername());
         return true;
     }
 
@@ -129,39 +79,78 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void logOut() {
+        UserSingleton.getInstance().clear();
         IntentMethods.startActivityFinishActual(this, LoginActivity.class);
     }
 
     /**
-     * set Data fields
+     * set useful data
      */
     private void setData() {
-        Intent intent = getIntent();
-        if (intent.getAction()!=null && intent.getAction().equals(LoginActivity.ACTION_CHANGE_ACTIVITY)) {
-            viewUtente = (ViewUtente) intent.getSerializableExtra(LoginActivity.VIEW_UTENTE_EXTRA_TAG);
-        }
 
-        resultListView = findViewById(R.id.activity_main_result_list_view);
+        mainActivityFragmentAdapter = new MainActivityFragmentAdapter(getSupportFragmentManager());
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.collocazione_result_item_text_view, new ArrayList<String>());
-        resultListView.setAdapter(adapter);
+        viewPager = findViewById(R.id.activity_main_view_pager);
 
-        resultlayout = findViewById(R.id.activity_main_result_rel_layout);
+        viewPager.setAdapter(mainActivityFragmentAdapter);
+
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                KeyboardMethods.hideKeyboard((Activity) context);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        TabLayout tabLayout= findViewById(R.id.activity_main_tab_layout);
+
+        tabLayout.setupWithViewPager(viewPager);
+
 
     }
 
-
+    @Override
+    protected void onNewIntent(Intent intent) {
+        // Because this activity has set launchMode="singleTop", the system calls this method
+        // to deliver the intent if this activity is currently the foreground activity when
+        // invoked again (when the user executes a search from this activity, we don't create
+        // a new instance of this activity, so the system delivers the search intent here)
+        handleIntent(intent);
+    }
 
     /**
-     * make search view features
+     * handle intent for search view
      */
-    private void setSearchView() {
+    private void handleIntent(Intent intent) {
 
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =  findViewById(R.id.activity_main_search_view);
-        searchView.setSearchableInfo(searchManager != null ? searchManager.getSearchableInfo(getComponentName()) : null);
-        searchView.setIconifiedByDefault(false);
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            // Handle the normal search query case
+            ToastMethods.showShortToast(this, "Selezionare una collocazione dalla lista.");
 
+        } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+
+            // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
+            Uri data = intent.getData();
+
+            CollocazioneFragment collocazioneFragment = (CollocazioneFragment) getSupportFragmentManager().findFragmentByTag(mainActivityFragmentAdapter.COLLOCAZIONE_FRAGMENT_TAG);
+
+            if (collocazioneFragment != null && viewPager.getCurrentItem() == MainActivityFragmentAdapter.COLLOCAZIONE_FRAGMENT_POSITION) {
+                collocazioneFragment.showResult(data);
+            }
+
+        }
 
     }
+
 }
+
+
