@@ -50,7 +50,7 @@ public class CollocazioniProvider extends ContentProvider {
 
         assert collocazioni != null;
         for (Collocazione collocazione: collocazioni) {
-            cursor.newRow().add(BaseColumns._ID,collocazione.getId_collocazione())
+            cursor.newRow().add(BaseColumns._ID,collocazione.getIdCollocazione())
                     .add(SearchManager.SUGGEST_COLUMN_TEXT_1,collocazione.getCollocazione())
                     .add("piano",collocazione.getPiano())
                     .add("stanza",collocazione.getStanza())

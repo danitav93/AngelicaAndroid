@@ -1,11 +1,15 @@
 package com.example.danieletavernelli.angelica.activity;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -16,19 +20,48 @@ import android.view.MenuItem;
 import com.example.danieletavernelli.angelica.R;
 import com.example.danieletavernelli.angelica.Singleton.UserSingleton;
 import com.example.danieletavernelli.angelica.adapter.MainActivityFragmentAdapter;
+import com.example.danieletavernelli.angelica.entity.Messaggio;
+import com.example.danieletavernelli.angelica.firebase.MessageService;
 import com.example.danieletavernelli.angelica.fragment.CollocazioneFragment;
+import com.example.danieletavernelli.angelica.rest.service.GitHubService;
+import com.example.danieletavernelli.angelica.utility.AppMethods;
+import com.example.danieletavernelli.angelica.utility.Constants;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.IntentMethods;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.KeyboardMethods;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.ToastMethods;
 
+import java.net.HttpURLConnection;
+
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
+
 //fragment for search collcoazioni
 public class MainActivity extends AppCompatActivity {
+
+    public static final String ACTION_CHAT_MESSAGE_DISPATCHED = "acmd";
+
+    public static final String EXTRA_MESSAGGIO_CHAT_RICEVUTO = "acmd";
 
     Context context =this;
 
     private MainActivityFragmentAdapter mainActivityFragmentAdapter;
 
     private ViewPager viewPager;
+
+    //Receiver for when arrive message
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(MessageService.ACTION_CHAT_MESSAGE_RECEIVED_FROM_SERVER)) {
+                long id_messaggio = intent.getLongExtra(MessageService.EXTRA_ID_MESSAGGIO, 0);
+                new GetMessaggioTask(context,id_messaggio).execute();
+            }
+        }
+
+
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +74,24 @@ public class MainActivity extends AppCompatActivity {
 
         setData();
 
+        checkGooglePlayServices();
+
+        registerReceiver(mMessageReceiver,new IntentFilter(MessageService.ACTION_CHAT_MESSAGE_RECEIVED_FROM_SERVER));
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(mMessageReceiver);
+        super.onDestroy();
+    }
 
 
-
+    //google play services for chat
+    private void checkGooglePlayServices() {
+        if (!AppMethods.isGooglePlayServicesAvailable(this)) {
+            AppMethods.makeGooglePlayServicesAvailable(this);
+        }
     }
 
     //setToolbar
@@ -52,6 +100,8 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar((Toolbar) findViewById(R.id.activity_main_toolbar));
 
     }
+
+
 
     /**
      * Set menu
@@ -150,6 +200,78 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+    public static class GetMessaggioTask extends AsyncTask<Void, Void, Boolean> {
+
+
+        private long idMessaggio;
+        private Response<Messaggio> response;
+        private Context context;
+        private Messaggio messaggio;
+        private LocalBroadcastManager broadcaster;
+
+
+        GetMessaggioTask(Context context, long idMessaggio) {
+            this.context = context;
+            this.idMessaggio = idMessaggio;
+            broadcaster = LocalBroadcastManager.getInstance(context);
+
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try {
+
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(Constants.SVILUPPO_BASE_URL_1)
+                        .addConverterFactory(JacksonConverterFactory.create())
+                        .build();
+
+                GitHubService service = retrofit.create(GitHubService.class);
+
+                Call<Messaggio> call = service.getMessaggio(idMessaggio);
+
+                response = call.execute();
+
+                if (response.isSuccessful() && response.code() == HttpURLConnection.HTTP_OK && response.body() != null) {
+                    messaggio = response.body();
+                    return true;
+                }
+
+                return false;
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+
+
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+
+            if (!success) {
+
+                ToastMethods.showShortToast(context,"Problemi di comunicazione con il server, non è possibile ricevere messaggi");
+
+            } else {
+
+                Intent intent = new Intent();
+                intent.setAction(ACTION_CHAT_MESSAGE_DISPATCHED);
+                intent.putExtra(EXTRA_MESSAGGIO_CHAT_RICEVUTO,messaggio);
+                broadcaster.sendBroadcast(intent);
+
+                //addNotificationArrivedMessage();
+
+            }
+        }
+
+    }
+
+
 
 }
 

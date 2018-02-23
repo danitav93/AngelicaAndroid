@@ -1,7 +1,9 @@
 package com.example.danieletavernelli.angelica.activity;
 
-import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
@@ -9,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 
 import com.example.danieletavernelli.angelica.R;
@@ -20,13 +23,16 @@ import com.example.danieletavernelli.angelica.model.ChatUserModel;
 import com.example.danieletavernelli.angelica.rest.service.GitHubService;
 import com.example.danieletavernelli.angelica.utility.AppMethods;
 import com.example.danieletavernelli.angelica.utility.Constants;
+import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.DialogMethods;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.ToastMethods;
 import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.util.Calendar;
 import java.util.List;
 
@@ -40,24 +46,25 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
  */
 public class ChatActivity extends AppCompatActivity {
 
-
+    public static String TAG = "Chat activity";
     public static String VIEW_UTENTE_INTERLOCUTORE_EXTRA_TAG = "viwUtenteInterLocutore";
 
     private Context context = this;
 
     //DATA
-    private ViewUtente viewUtenteLoggato = UserSingleton.getInstance().getViewUtente();
-    private ChatUserModel chatUserModelUtenteLoggato = new ChatUserModel(viewUtenteLoggato);
-    private ViewUtente viewUtenteInterlocutore ;
-    private ChatUserModel chatUserModelUtenteInterlocutore;
+    ViewUtente viewUtenteLoggato = UserSingleton.getInstance().getViewUtente();
+    ChatUserModel chatUserModelUtenteLoggato = new ChatUserModel(viewUtenteLoggato);
+    ViewUtente viewUtenteInterlocutore;
+    ChatUserModel chatUserModelUtenteInterlocutore;
 
-    private List<Messaggio> messaggi;
+    List<Messaggio> messaggi;
 
     MessagesListAdapter<ChatMessaggioModel> adapter;
 
     //layout
-    private MessagesList messagesList;
+    MessagesList messagesList;
     private MessageInput messageInput;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +84,14 @@ public class ChatActivity extends AppCompatActivity {
         setChat();
 
         setBar();
+
+        registerReceiver(mMessageReceiver,new IntentFilter(MainActivity.ACTION_CHAT_MESSAGE_DISPATCHED));
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(mMessageReceiver);
+        super.onDestroy();
     }
 
     private void setInputChatMessage() {
@@ -88,11 +103,14 @@ public class ChatActivity extends AppCompatActivity {
             public boolean onSubmit(CharSequence input) {
                 Messaggio messaggio = new Messaggio();
                 messaggio.setBody(input.toString());
-                messaggio.setId_destinatario(viewUtenteInterlocutore.getId_utente());
-                messaggio.setId_mittente(viewUtenteLoggato.getId_utente());
+                messaggio.setIdDestinatario(viewUtenteInterlocutore.getIdUtente());
+                messaggio.setIdMittente(viewUtenteLoggato.getIdUtente());
                 messaggio.setData(Calendar.getInstance().getTime());
+                messaggio.setLetto(0);
+                adapter.addToStart(new ChatMessaggioModel(chatUserModelUtenteLoggato, messaggio), true);
 
-                adapter.addToStart(new ChatMessaggioModel(chatUserModelUtenteLoggato,messaggio), true);
+                new saveMessageTask(messaggio, context).execute();
+
                 return true;
             }
         });
@@ -109,7 +127,7 @@ public class ChatActivity extends AppCompatActivity {
                 finish();
             }
         });
-        Drawable icon =AppMethods.getUserIconeBasedOnRole(this,viewUtenteInterlocutore);
+        Drawable icon = AppMethods.getUserIconeBasedOnRole(this, viewUtenteInterlocutore);
         icon.setColorFilter(new
                 PorterDuffColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_ATOP));
         getSupportActionBar().setTitle(viewUtenteInterlocutore.getUsername());
@@ -135,7 +153,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         };*/
 
-        adapter = new MessagesListAdapter<>(viewUtenteLoggato.getId_utente().toString(), null);
+        adapter = new MessagesListAdapter<>(viewUtenteLoggato.getIdUtente().toString(), null);
 
         /*adapter.setLoadMoreListener(new MessagesListAdapter.OnLoadMoreListener() {
             @Override
@@ -148,61 +166,152 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-    @SuppressLint("StaticFieldLeak")
     private void setMessageList() {
 
-        new AsyncTask<Void,Void,Boolean>() {
+        GetMessaggiTask getMessaggiTask = new GetMessaggiTask(this);
+        getMessaggiTask.execute();
 
-            Response<List<Messaggio>> response;
+    }
 
-            @Override
-            protected Boolean doInBackground(Void... voids) {
+    private static class GetMessaggiTask extends AsyncTask<Void, Void, Boolean> {
+
+        Response<List<Messaggio>> response;
+
+        private WeakReference<ChatActivity> chatActivity;
+
+        private GetMessaggiTask(ChatActivity chatActivity) {
+            this.chatActivity = new WeakReference<>(chatActivity);
+
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(Constants.SVILUPPO_BASE_URL_1)
+                    .addConverterFactory(JacksonConverterFactory.create())
+                    .build();
+
+            GitHubService service = retrofit.create(GitHubService.class);
+
+            Call<List<Messaggio>> call = service.getChat(1, 50, chatActivity.get().viewUtenteLoggato.getIdUtente(), chatActivity.get().viewUtenteInterlocutore.getIdUtente());
+
+            try {
+
+                response = call.execute();
+
+                if (response.isSuccessful() && response.code() == HttpURLConnection.HTTP_OK) {
+                    chatActivity.get().messaggi = response.body();
+                    return true;
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
+
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+
+            if (success) {
+                for (Messaggio messaggio : chatActivity.get().messaggi) {
+                    ChatMessaggioModel chatMessaggioModel;
+                    if (messaggio.getIdMittente().equals(chatActivity.get().viewUtenteLoggato.getIdUtente())) {
+                        chatMessaggioModel = new ChatMessaggioModel(chatActivity.get().chatUserModelUtenteLoggato, messaggio);
+                    } else {
+                        chatMessaggioModel = new ChatMessaggioModel(chatActivity.get().chatUserModelUtenteInterlocutore, messaggio);
+                    }
+                    ((MessagesListAdapter<ChatMessaggioModel>) chatActivity.get().messagesList.getAdapter()).addToStart(chatMessaggioModel, true);
+                }
+            } else if (response != null) {
+                ToastMethods.showShortToast(chatActivity.get(), "Errore " + response.code());
+            } else {
+                ToastMethods.showShortToast(chatActivity.get(), "Errore nella comunicazione con il server");
+            }
+
+        }
+
+    }
+
+    public static class saveMessageTask extends AsyncTask<Void, Void, Boolean> {
+
+        private Response<Boolean> response;
+        private Exception e;
+        private Messaggio messaggio;
+        private WeakReference<Context> context;
+
+        saveMessageTask(Messaggio messaggio, Context context) {
+            this.messaggio = messaggio;
+            this.context = new WeakReference<>(context);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            try {
 
                 Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(Constants.SVILUPPO_BASE_URL_1 )
+                        .baseUrl(Constants.SVILUPPO_BASE_URL_1)
                         .addConverterFactory(JacksonConverterFactory.create())
                         .build();
 
                 GitHubService service = retrofit.create(GitHubService.class);
 
-                Call<List<Messaggio>> call = service.getChat(1,50,viewUtenteLoggato.getId_utente(),viewUtenteInterlocutore.getId_utente());
+                Call<Boolean> call = service.saveMessaggio(messaggio);
 
-                try {
+                response = call.execute();
 
-                    response = call.execute();
+                return (response.isSuccessful() && response.code() == HttpURLConnection.HTTP_OK);
 
-                    if (response.isSuccessful() && response.code() == HttpURLConnection.HTTP_OK) {
-                        messaggi=response.body();
-                        return true;
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            } catch (Exception e) {
+                this.e = e;
+                e.printStackTrace();
                 return false;
-
             }
 
-            @Override
-            protected void onPostExecute(final Boolean success) {
-                if (success) {
-                    for (Messaggio messaggio:messaggi) {
-                        ChatMessaggioModel chatMessaggioModel;
-                        if (messaggio.getId_mittente().equals(viewUtenteLoggato.getId_utente())) {
-                            chatMessaggioModel = new ChatMessaggioModel(chatUserModelUtenteLoggato,messaggio);
-                        } else {
-                            chatMessaggioModel = new ChatMessaggioModel(chatUserModelUtenteInterlocutore,messaggio);
-                        }
-                        ((MessagesListAdapter<ChatMessaggioModel>)messagesList.getAdapter()).addToStart(chatMessaggioModel,true);
-                    }
-                } else if (response!=null){
-                    ToastMethods.showShortToast(context, "Errore " + response.code());
+
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+
+            if (!success) {
+
+                if (response != null) {
+                    Log.e(TAG, "errore durante la login. Response code: " + response.code());
+                    DialogMethods.createMessageAlertDialog(context.get(), "Errore " + response.code(), null);
                 } else {
-                    ToastMethods.showShortToast(context, "Errore nella comunicazione con il server");
+                    String errorToShow = "Errore durante la richiesta ";
+                    if (e instanceof SocketTimeoutException) {
+                        errorToShow = "Problema di comunicazione con il server";
+                    }
+                    DialogMethods.createMessageAlertDialog(context.get(), errorToShow, null);
                 }
 
             }
+        }
 
-        }.execute();
     }
+
+    //Receiver for when arrive message
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (intent.getAction().equals(MainActivity.ACTION_CHAT_MESSAGE_DISPATCHED)) {
+                Messaggio messaggio = (Messaggio) intent.getSerializableExtra(MainActivity.EXTRA_MESSAGGIO_CHAT_RICEVUTO);
+                if (messaggio.getIdMittente().equals(viewUtenteInterlocutore.getIdUtente())) {
+                    ChatMessaggioModel chatMessaggioModel = new ChatMessaggioModel(chatUserModelUtenteInterlocutore,messaggio);
+                    adapter.addToStart(chatMessaggioModel,true);
+                }
+            }
+
+        }
+
+
+    };
+
+
 }

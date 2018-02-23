@@ -21,8 +21,20 @@ import retrofit2.http.Query;
 
 public interface GitHubService {
 
+
+    //POST
+
     @POST(Constants.LOGIN_PATH)
     Call<ViewUtente> loginUser(@Body ViewUtente viewUtente);
+
+    @POST(Constants.SAVE_MESSAGGIO_PATH)
+    Call<Boolean> saveMessaggio(@Body Messaggio messaggio);
+
+    @POST(Constants.REFRESH_TOKEN)
+    Call<Boolean> refreshToken(@Query("refreshToken") String refreshToken, @Query("idUtente") long idUtente);
+
+
+    //GET
 
     @GET(Constants.COLLOCAZIONE_PATH)
     Call<List<Collocazione>> getPageCollocazione(@Query("page") int page,
@@ -38,4 +50,6 @@ public interface GitHubService {
                                   @Query("id_mittente") long id_mittente,
                                   @Query("id_destinatario") long id_destinatario);
 
+    @GET(Constants.GET_MESSAGGIO_PATH)
+    Call<Messaggio> getMessaggio(@Query("id_messaggio") long idMessaggio);
 }

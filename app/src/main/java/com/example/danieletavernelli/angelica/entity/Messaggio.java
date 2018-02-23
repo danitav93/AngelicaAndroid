@@ -1,5 +1,6 @@
 package com.example.danieletavernelli.angelica.entity;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -7,10 +8,10 @@ import java.util.Date;
  *
  */
 
-public class Messaggio  {
+public class Messaggio implements Serializable {
 
-    private Long id_messaggio;
-    private Long id_mittente,id_destinatario;
+    private Integer idMessaggio;
+    private Integer idMittente, idDestinatario;
     private Date data;
     private String body;
     private int letto;
@@ -20,28 +21,28 @@ public class Messaggio  {
     public Messaggio() {
     }
 
-    public Long getId_messaggio() {
-        return id_messaggio;
+    public Integer getIdMessaggio() {
+        return idMessaggio;
     }
 
-    public void setId_messaggio(Long id_messaggio) {
-        this.id_messaggio = id_messaggio;
+    public void setIdMessaggio(Integer idMessaggio) {
+        this.idMessaggio = idMessaggio;
     }
 
-    public Long getId_mittente() {
-        return id_mittente;
+    public Integer getIdMittente() {
+        return idMittente;
     }
 
-    public void setId_mittente(Long id_mittente) {
-        this.id_mittente = id_mittente;
+    public void setIdMittente(Integer idMittente) {
+        this.idMittente = idMittente;
     }
 
-    public Long getId_destinatario() {
-        return id_destinatario;
+    public Integer getIdDestinatario() {
+        return idDestinatario;
     }
 
-    public void setId_destinatario(Long id_destinatario) {
-        this.id_destinatario = id_destinatario;
+    public void setIdDestinatario(Integer idDestinatario) {
+        this.idDestinatario = idDestinatario;
     }
 
     public Date getData() {

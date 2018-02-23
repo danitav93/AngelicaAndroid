@@ -84,7 +84,7 @@ public class ChatFragment  extends Fragment {
 
                 GitHubService service = retrofit.create(GitHubService.class);
 
-                Call<List<ViewUtente>> call = service.getUserListForMessage(UserSingleton.getInstance().getViewUtente().getId_utente());
+                Call<List<ViewUtente>> call = service.getUserListForMessage(UserSingleton.getInstance().getViewUtente().getIdUtente());
 
                 try {
 

@@ -1,7 +1,5 @@
 package com.example.danieletavernelli.angelica.entity;
 
-import com.stfalcon.chatkit.commons.models.IUser;
-
 import java.io.Serializable;
 
 /**
@@ -12,8 +10,8 @@ import java.io.Serializable;
 public class ViewUtente implements Serializable {
 
 
-    private Long id_utente, idRuolo;
-    private String username,password,nome_ruolo,descFunc;
+    private Integer idUtente, idRuolo;
+    private String username,password, nomeRuolo,descFunc;
 
     public ViewUtente() {
         super();
@@ -24,40 +22,40 @@ public class ViewUtente implements Serializable {
         this.password = password;
     }
 
-    public ViewUtente(Long idRuolo, String username, String password,
-                      String nome_ruolo) {
+    public ViewUtente(Integer idRuolo, String username, String password,
+                      String nomeRuolo) {
         super();
         this.idRuolo = idRuolo;
         this.username = username;
         this.password = password;
-        this.nome_ruolo = nome_ruolo;
+        this.nomeRuolo = nomeRuolo;
     }
 
 
 
-    public ViewUtente(Long id_utente, Long idRuolo, String username,
-                      String password, String nome_ruolo) {
+    public ViewUtente(Integer idUtente, Integer idRuolo, String username,
+                      String password, String nomeRuolo) {
         super();
-        this.id_utente = id_utente;
+        this.idUtente = idUtente;
         this.idRuolo = idRuolo;
         this.username = username;
         this.password = password;
-        this.nome_ruolo = nome_ruolo;
+        this.nomeRuolo = nomeRuolo;
     }
 
-    public Long getId_utente() {
-        return id_utente;
+    public Integer getIdUtente() {
+        return idUtente;
     }
 
-    public void setId_utente(Long id_utente) {
-        this.id_utente = id_utente;
+    public void setIdUtente(Integer idUtente) {
+        this.idUtente = idUtente;
     }
 
-    public Long getIdRuolo() {
+    public Integer getIdRuolo() {
         return idRuolo;
     }
 
-    public void setIdRuolo(Long idRuolo) {
+    public void setIdRuolo(Integer idRuolo) {
         this.idRuolo = idRuolo;
     }
 
@@ -77,12 +75,12 @@ public class ViewUtente implements Serializable {
         this.password = password;
     }
 
-    public String getNome_ruolo() {
-        return nome_ruolo;
+    public String getNomeRuolo() {
+        return nomeRuolo;
     }
 
-    public void setNome_ruolo(String nome_ruolo) {
-        this.nome_ruolo = nome_ruolo;
+    public void setNomeRuolo(String nomeRuolo) {
+        this.nomeRuolo = nomeRuolo;
     }
 
     public String getDescFunc() {
@@ -95,7 +93,7 @@ public class ViewUtente implements Serializable {
 
     @Override
     public String toString() {
-        return "id: "+getId_utente()+"; username: "+getUsername();
+        return "id: "+ getIdUtente()+"; username: "+getUsername();
     }
 
 

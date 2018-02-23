@@ -17,7 +17,7 @@ public class ChatUserModel implements IUser {
 
     @Override
     public String getId() {
-        return viewUtente.getId_utente().toString();
+        return viewUtente.getIdUtente().toString();
     }
 
     @Override

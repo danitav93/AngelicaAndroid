@@ -21,7 +21,7 @@ public class ChatMessaggioModel implements IMessage {
 
     @Override
     public String getId() {
-        return messaggio.getId_messaggio().toString();
+        return messaggio.getIdMessaggio().toString();
     }
 
     @Override

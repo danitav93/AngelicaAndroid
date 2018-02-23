@@ -1,5 +1,6 @@
 package com.example.danieletavernelli.angelica.utility;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -10,6 +11,8 @@ import android.widget.TextView;
 
 import com.example.danieletavernelli.angelica.R;
 import com.example.danieletavernelli.angelica.entity.ViewUtente;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -80,4 +83,17 @@ public class AppMethods {
 
     }
 
+
+    //Check if google play services are available
+    public static boolean isGooglePlayServicesAvailable(Context context){
+        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(context);
+        return resultCode == ConnectionResult.SUCCESS;
+    }
+
+    //allow users to download Google Play services from the Play Store.
+    public static void makeGooglePlayServicesAvailable(Activity context) {
+        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
+        googleApiAvailability.makeGooglePlayServicesAvailable(context);
+    }
 }
