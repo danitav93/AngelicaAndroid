@@ -8,6 +8,8 @@ import com.example.danieletavernelli.angelica.utility.Constants;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.lang.ref.WeakReference;
+
 /**
   Created by Daniele Tavernelli on 2/21/2018.
  */
@@ -20,11 +22,12 @@ public class MessageService extends FirebaseMessagingService {
 
     public static final String EXTRA_ID_MESSAGGIO = "eim";
 
-    private LocalBroadcastManager broadcaster;
+    public static WeakReference<LocalBroadcastManager> broadcaster;
+
 
     @Override
     public void onCreate() {
-        broadcaster = LocalBroadcastManager.getInstance(this);
+        broadcaster = new WeakReference<>(LocalBroadcastManager.getInstance(this));
     }
 
     @Override
@@ -39,16 +42,16 @@ public class MessageService extends FirebaseMessagingService {
 
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
 
-            Intent intent = new Intent();
-            intent.setAction(ACTION_CHAT_MESSAGE_RECEIVED_FROM_SERVER);
-            intent.putExtra(EXTRA_ID_MESSAGGIO,Long.parseLong(remoteMessage.getData().get(Constants.KEY_ID_MESSAGGIO)));
-            broadcaster.sendBroadcast(intent);
+            Intent intent = new Intent(ACTION_CHAT_MESSAGE_RECEIVED_FROM_SERVER);
+            intent.putExtra(EXTRA_ID_MESSAGGIO,Integer.parseInt(remoteMessage.getData().get(Constants.KEY_ID_MESSAGGIO)));
+            broadcaster.get().sendBroadcast(intent);
 
         }
 
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+
         }
 
         // Also if you intend on generating your own notifications as a result of a received FCM

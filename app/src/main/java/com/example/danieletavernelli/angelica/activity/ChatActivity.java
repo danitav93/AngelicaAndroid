@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -50,6 +51,8 @@ public class ChatActivity extends AppCompatActivity {
     public static String VIEW_UTENTE_INTERLOCUTORE_EXTRA_TAG = "viwUtenteInterLocutore";
 
     private Context context = this;
+
+
 
     //DATA
     ViewUtente viewUtenteLoggato = UserSingleton.getInstance().getViewUtente();
@@ -85,12 +88,15 @@ public class ChatActivity extends AppCompatActivity {
 
         setBar();
 
-        registerReceiver(mMessageReceiver,new IntentFilter(MainActivity.ACTION_CHAT_MESSAGE_DISPATCHED));
+        MainActivity.broadcaster.get().registerReceiver(mMessageReceiver, new IntentFilter(MainActivity.ACTION_CHAT_MESSAGE_DISPATCHED));
+
+
+
     }
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(mMessageReceiver);
+        MainActivity.broadcaster.get().unregisterReceiver(mMessageReceiver);
         super.onDestroy();
     }
 
@@ -194,7 +200,7 @@ public class ChatActivity extends AppCompatActivity {
 
             GitHubService service = retrofit.create(GitHubService.class);
 
-            Call<List<Messaggio>> call = service.getChat(1, 50, chatActivity.get().viewUtenteLoggato.getIdUtente(), chatActivity.get().viewUtenteInterlocutore.getIdUtente());
+            Call<List<Messaggio>> call = service.getChat(1, 20, chatActivity.get().viewUtenteLoggato.getIdUtente(), chatActivity.get().viewUtenteInterlocutore.getIdUtente());
 
             try {
 
@@ -216,6 +222,8 @@ public class ChatActivity extends AppCompatActivity {
         protected void onPostExecute(final Boolean success) {
 
             if (success) {
+                List<ChatMessaggioModel> listToAdd = new ArrayList<>();
+                List<Integer> msgIds = new ArrayList<>();
                 for (Messaggio messaggio : chatActivity.get().messaggi) {
                     ChatMessaggioModel chatMessaggioModel;
                     if (messaggio.getIdMittente().equals(chatActivity.get().viewUtenteLoggato.getIdUtente())) {
@@ -223,8 +231,16 @@ public class ChatActivity extends AppCompatActivity {
                     } else {
                         chatMessaggioModel = new ChatMessaggioModel(chatActivity.get().chatUserModelUtenteInterlocutore, messaggio);
                     }
-                    ((MessagesListAdapter<ChatMessaggioModel>) chatActivity.get().messagesList.getAdapter()).addToStart(chatMessaggioModel, true);
+                    listToAdd.add(chatMessaggioModel);
+                    if (messaggio.getLetto()==0) {
+                        msgIds.add(messaggio.getIdMessaggio());
+                    }
                 }
+                if (!msgIds.isEmpty()) {
+                    new SetMessaggiLettoTask(msgIds).execute();
+                }
+                ((MessagesListAdapter<ChatMessaggioModel>) chatActivity.get().messagesList.getAdapter()).addToEnd(listToAdd, false);
+
             } else if (response != null) {
                 ToastMethods.showShortToast(chatActivity.get(), "Errore " + response.code());
             } else {
@@ -296,7 +312,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     //Receiver for when arrive message
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    public BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -305,6 +321,9 @@ public class ChatActivity extends AppCompatActivity {
                 if (messaggio.getIdMittente().equals(viewUtenteInterlocutore.getIdUtente())) {
                     ChatMessaggioModel chatMessaggioModel = new ChatMessaggioModel(chatUserModelUtenteInterlocutore,messaggio);
                     adapter.addToStart(chatMessaggioModel,true);
+                    List<Integer> msgids = new ArrayList<>();
+                    msgids.add(messaggio.getIdMessaggio());
+                    new SetMessaggiLettoTask(msgids).execute();
                 }
             }
 
@@ -313,5 +332,48 @@ public class ChatActivity extends AppCompatActivity {
 
     };
 
+    private static class SetMessaggiLettoTask extends AsyncTask<Void,Void,Boolean>{
 
+        private  List<Integer> idsmsg;
+
+        private Response<Boolean> response;
+
+        SetMessaggiLettoTask(List<Integer> idsmsg) {
+            this.idsmsg=idsmsg;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+
+            try {
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(Constants.SVILUPPO_BASE_URL_1)
+                        .addConverterFactory(JacksonConverterFactory.create())
+                        .build();
+
+                GitHubService service = retrofit.create(GitHubService.class);
+
+                Call<Boolean> call = service.setMessaggioLetto(idsmsg);
+
+                response = call.execute();
+
+                return (response.isSuccessful() && response.code() == HttpURLConnection.HTTP_OK);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+
+            if (!success) {
+
+                //Todo: handle success and failure of set messaggio letto
+
+            }
+        }
+    }
 }

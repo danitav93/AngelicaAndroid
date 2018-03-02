@@ -25,13 +25,16 @@ public interface GitHubService {
     //POST
 
     @POST(Constants.LOGIN_PATH)
-    Call<ViewUtente> loginUser(@Body ViewUtente viewUtente);
+    Call<ViewUtente> loginUser(@Body ViewUtente viewUtente, @Query("cmToken") String token);
 
     @POST(Constants.SAVE_MESSAGGIO_PATH)
     Call<Boolean> saveMessaggio(@Body Messaggio messaggio);
 
     @POST(Constants.REFRESH_TOKEN)
-    Call<Boolean> refreshToken(@Query("refreshToken") String refreshToken, @Query("idUtente") long idUtente);
+    Call<Boolean> refreshToken(@Query("refreshToken") String refreshToken, @Query("idUtente") int idUtente);
+
+    @POST(Constants.SET_MESSAGGIO_LETTO_PATH)
+    Call<Boolean> setMessaggioLetto(@Body List<Integer> messaggiIds);
 
 
     //GET
@@ -48,8 +51,8 @@ public interface GitHubService {
     Call<List<Messaggio>> getChat(@Query("page") int page,
                                   @Query("size") int size,
                                   @Query("id_mittente") long id_mittente,
-                                  @Query("id_destinatario") long id_destinatario);
+                                  @Query("id_destinatario") int id_destinatario);
 
     @GET(Constants.GET_MESSAGGIO_PATH)
-    Call<Messaggio> getMessaggio(@Query("id_messaggio") long idMessaggio);
+    Call<Messaggio> getMessaggio(@Query("id_messaggio") int idMessaggio);
 }

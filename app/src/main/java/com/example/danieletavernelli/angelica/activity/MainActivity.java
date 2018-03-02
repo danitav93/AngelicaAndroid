@@ -13,6 +13,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -29,16 +30,25 @@ import com.example.danieletavernelli.angelica.utility.Constants;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.IntentMethods;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.KeyboardMethods;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.ToastMethods;
+import com.google.firebase.iid.FirebaseInstanceId;
 
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import static com.example.danieletavernelli.angelica.firebase.MessageService.ACTION_CHAT_MESSAGE_RECEIVED_FROM_SERVER;
+
 //fragment for search collcoazioni
 public class MainActivity extends AppCompatActivity {
+
+
+    public static final String TAG = "MainActivity";
 
     public static final String ACTION_CHAT_MESSAGE_DISPATCHED = "acmd";
 
@@ -51,17 +61,10 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager viewPager;
 
     //Receiver for when arrive message
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(MessageService.ACTION_CHAT_MESSAGE_RECEIVED_FROM_SERVER)) {
-                long id_messaggio = intent.getLongExtra(MessageService.EXTRA_ID_MESSAGGIO, 0);
-                new GetMessaggioTask(context,id_messaggio).execute();
-            }
-        }
+    public MainActivityReceiver mMessageReceiver ;
 
+    public static WeakReference<LocalBroadcastManager> broadcaster;
 
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,13 +79,29 @@ public class MainActivity extends AppCompatActivity {
 
         checkGooglePlayServices();
 
-        registerReceiver(mMessageReceiver,new IntentFilter(MessageService.ACTION_CHAT_MESSAGE_RECEIVED_FROM_SERVER));
+        setReceiver();
+
+        Log.d(TAG, FirebaseInstanceId.getInstance().getToken());
+
+        broadcaster = new WeakReference<>(LocalBroadcastManager.getInstance(context));
+
+
+
+    }
+
+    private void setReceiver() {
+        mMessageReceiver=  new MainActivityReceiver();
+        if (MessageService.broadcaster!=null) {
+            MessageService.broadcaster.get().registerReceiver(mMessageReceiver,new IntentFilter(ACTION_CHAT_MESSAGE_RECEIVED_FROM_SERVER));
+        }
 
     }
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(mMessageReceiver);
+        if (MessageService.broadcaster!=null) {
+            MessageService.broadcaster.get().unregisterReceiver(mMessageReceiver);
+        }
         super.onDestroy();
     }
 
@@ -204,17 +223,15 @@ public class MainActivity extends AppCompatActivity {
     public static class GetMessaggioTask extends AsyncTask<Void, Void, Boolean> {
 
 
-        private long idMessaggio;
+        private int idMessaggio;
         private Response<Messaggio> response;
-        private Context context;
+        private WeakReference<Context> context;
         private Messaggio messaggio;
-        private LocalBroadcastManager broadcaster;
 
 
-        GetMessaggioTask(Context context, long idMessaggio) {
-            this.context = context;
+        GetMessaggioTask(Context context, int idMessaggio) {
+            this.context = new WeakReference<>(context);
             this.idMessaggio = idMessaggio;
-            broadcaster = LocalBroadcastManager.getInstance(context);
 
         }
 
@@ -255,14 +272,14 @@ public class MainActivity extends AppCompatActivity {
 
             if (!success) {
 
-                ToastMethods.showShortToast(context,"Problemi di comunicazione con il server, non è possibile ricevere messaggi");
+                ToastMethods.showShortToast(context.get(),"Problemi di comunicazione con il server, non è possibile ricevere messaggi");
 
             } else {
 
                 Intent intent = new Intent();
                 intent.setAction(ACTION_CHAT_MESSAGE_DISPATCHED);
                 intent.putExtra(EXTRA_MESSAGGIO_CHAT_RICEVUTO,messaggio);
-                broadcaster.sendBroadcast(intent);
+                broadcaster.get().sendBroadcast(intent);
 
                 //addNotificationArrivedMessage();
 
@@ -271,6 +288,23 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    public class MainActivityReceiver extends BroadcastReceiver{
+
+        private List<Integer> messageHandled = new ArrayList<>();
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ACTION_CHAT_MESSAGE_RECEIVED_FROM_SERVER)) {
+                int id_messaggio = intent.getIntExtra(MessageService.EXTRA_ID_MESSAGGIO, 0);
+                if (!messageHandled.contains(id_messaggio)) {
+                    new GetMessaggioTask(context, id_messaggio).execute();
+                    messageHandled.add(id_messaggio);
+                }
+            }
+        }
+
+    }
 
 
 }

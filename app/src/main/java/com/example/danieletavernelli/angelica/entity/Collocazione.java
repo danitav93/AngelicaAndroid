@@ -6,7 +6,7 @@ package com.example.danieletavernelli.angelica.entity;
 
 public class Collocazione {
 
-    private long idCollocazione;
+    private int idCollocazione;
 
     private String collocazione,piano,stanza,denominazione,note;
 
@@ -29,7 +29,7 @@ public class Collocazione {
 
 
 
-    public Collocazione(long idCollocazione, String collocazione,
+    public Collocazione(int idCollocazione, String collocazione,
                         String piano, String stanza, String denominazione,
                         String note) {
         super();
@@ -43,11 +43,11 @@ public class Collocazione {
 
 
 
-    public long getIdCollocazione() {
+    public int getIdCollocazione() {
         return idCollocazione;
     }
 
-    public void setIdCollocazione(long idCollocazione) {
+    public void setIdCollocazione(int idCollocazione) {
         this.idCollocazione = idCollocazione;
     }
 

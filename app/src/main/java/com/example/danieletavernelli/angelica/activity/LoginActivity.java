@@ -37,6 +37,7 @@ import com.example.danieletavernelli.angelica.utility.Constants;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.DialogMethods;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.IntentMethods;
 import com.example.tavernelli.daniele.libreriadidanieletavernelli.Methods.KeyboardMethods;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
@@ -334,7 +335,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 GitHubService service = retrofit.create(GitHubService.class);
 
-                Call<ViewUtente> call = service.loginUser(new ViewUtente(mUsername, mPassword));
+                Call<ViewUtente> call = service.loginUser(new ViewUtente(mUsername, mPassword), FirebaseInstanceId.getInstance().getToken());
 
                 response = call.execute();
 
