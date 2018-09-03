@@ -55,7 +55,7 @@ public class TokensService extends FirebaseInstanceIdService {
 
             try {
                 Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(Constants.SVILUPPO_BASE_URL_1)
+                        .baseUrl(Constants.BASE_URL)
                         .addConverterFactory(JacksonConverterFactory.create())
                         .build();
 

@@ -88,10 +88,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         // Set up the login form.
-        mUsernameView = findViewById(R.id.username);
+        mUsernameView = (AutoCompleteTextView) findViewById(R.id.username);
         populateAutoComplete();
 
-        mPasswordView = findViewById(R.id.password);
+        mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -103,7 +103,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        Button mUsernameSignInButton = findViewById(R.id.username_sign_in_button);
+        Button mUsernameSignInButton = (Button) findViewById(R.id.username_sign_in_button);
         mUsernameSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -329,7 +329,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             try {
 
                 Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(Constants.SVILUPPO_BASE_URL_1 )
+                        .baseUrl(Constants.BASE_URL)
                         .addConverterFactory(JacksonConverterFactory.create())
                         .build();
 

@@ -14,7 +14,8 @@ public class Constants {
 
 
     //rest
-    public static final String SVILUPPO_BASE_URL_1="http://10.0.0.24:8080/";
+    public static final String BASE_URL="http://192.168.0.170:8080/";
+    //public static final String BASE_URL="http://angelica.eu-west-3.elasticbeanstalk.com/:8080/";
     public static final String LOGIN_PATH = "utente/login/";
     public static final String REFRESH_TOKEN ="utente/refreshToken/" ;
     public static final String COLLOCAZIONE_PATH ="collocazione";

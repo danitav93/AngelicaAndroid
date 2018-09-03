@@ -78,7 +78,7 @@ public class ChatFragment  extends Fragment {
             @Override
             protected Boolean doInBackground(Void... voids) {
                 Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(Constants.SVILUPPO_BASE_URL_1 )
+                        .baseUrl(Constants.BASE_URL )
                         .addConverterFactory(JacksonConverterFactory.create())
                         .build();
 

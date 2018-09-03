@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager viewPager;
 
     //Receiver for when arrive message
-    public MainActivityReceiver mMessageReceiver ;
+    public static MainActivityReceiver mMessageReceiver ;
 
     public static WeakReference<LocalBroadcastManager> broadcaster;
 
@@ -79,8 +79,6 @@ public class MainActivity extends AppCompatActivity {
 
         checkGooglePlayServices();
 
-        setReceiver();
-
         Log.d(TAG, FirebaseInstanceId.getInstance().getToken());
 
         broadcaster = new WeakReference<>(LocalBroadcastManager.getInstance(context));
@@ -89,12 +87,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void setReceiver() {
-        mMessageReceiver=  new MainActivityReceiver();
-        if (MessageService.broadcaster!=null) {
-            MessageService.broadcaster.get().registerReceiver(mMessageReceiver,new IntentFilter(ACTION_CHAT_MESSAGE_RECEIVED_FROM_SERVER));
-        }
+    public static BroadcastReceiver getReceiver() {
 
+        if (mMessageReceiver==null) {
+            mMessageReceiver= new  MainActivity.MainActivityReceiver();
+        }
+        return mMessageReceiver;
     }
 
     @Override
@@ -159,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
         mainActivityFragmentAdapter = new MainActivityFragmentAdapter(getSupportFragmentManager());
 
-        viewPager = findViewById(R.id.activity_main_view_pager);
+        viewPager = (ViewPager) findViewById(R.id.activity_main_view_pager);
 
         viewPager.setAdapter(mainActivityFragmentAdapter);
 
@@ -180,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        TabLayout tabLayout= findViewById(R.id.activity_main_tab_layout);
+        TabLayout tabLayout= (TabLayout) findViewById(R.id.activity_main_tab_layout);
 
         tabLayout.setupWithViewPager(viewPager);
 
@@ -241,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
             try {
 
                 Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(Constants.SVILUPPO_BASE_URL_1)
+                        .baseUrl(Constants.BASE_URL)
                         .addConverterFactory(JacksonConverterFactory.create())
                         .build();
 
@@ -289,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public class MainActivityReceiver extends BroadcastReceiver{
+    public static  class MainActivityReceiver extends BroadcastReceiver{
 
         private List<Integer> messageHandled = new ArrayList<>();
 

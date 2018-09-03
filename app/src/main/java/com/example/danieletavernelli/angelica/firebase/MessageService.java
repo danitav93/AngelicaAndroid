@@ -1,9 +1,11 @@
 package com.example.danieletavernelli.angelica.firebase;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.example.danieletavernelli.angelica.activity.MainActivity;
 import com.example.danieletavernelli.angelica.utility.Constants;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -27,7 +29,9 @@ public class MessageService extends FirebaseMessagingService {
 
     @Override
     public void onCreate() {
+
         broadcaster = new WeakReference<>(LocalBroadcastManager.getInstance(this));
+        broadcaster.get().registerReceiver(MainActivity.getReceiver(),new IntentFilter(ACTION_CHAT_MESSAGE_RECEIVED_FROM_SERVER));
     }
 
     @Override

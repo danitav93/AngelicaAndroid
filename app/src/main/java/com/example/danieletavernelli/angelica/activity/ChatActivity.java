@@ -102,7 +102,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void setInputChatMessage() {
 
-        messageInput = findViewById(R.id.activity_chat_input);
+        messageInput = (MessageInput) findViewById(R.id.activity_chat_input);
 
         messageInput.setInputListener(new MessageInput.InputListener() {
             @Override
@@ -124,7 +124,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void setBar() {
 
-        Toolbar toolbarLayout = findViewById(R.id.activity_chat_toolbar);
+        Toolbar toolbarLayout = (Toolbar) findViewById(R.id.activity_chat_toolbar);
         setSupportActionBar(toolbarLayout);
         toolbarLayout.setNavigationIcon(R.drawable.back_arrow);
         toolbarLayout.setNavigationOnClickListener(new View.OnClickListener() {
@@ -144,7 +144,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void setChat() {
 
-        messagesList = findViewById(R.id.activity_chat_messagesList);
+        messagesList = (MessagesList) findViewById(R.id.activity_chat_messagesList);
 
         /*ImageLoader imageLoader = new ImageLoader() {
             @Override
@@ -194,7 +194,7 @@ public class ChatActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... voids) {
 
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(Constants.SVILUPPO_BASE_URL_1)
+                    .baseUrl(Constants.BASE_URL)
                     .addConverterFactory(JacksonConverterFactory.create())
                     .build();
 
@@ -269,7 +269,7 @@ public class ChatActivity extends AppCompatActivity {
             try {
 
                 Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(Constants.SVILUPPO_BASE_URL_1)
+                        .baseUrl(Constants.BASE_URL)
                         .addConverterFactory(JacksonConverterFactory.create())
                         .build();
 
@@ -347,7 +347,7 @@ public class ChatActivity extends AppCompatActivity {
 
             try {
                 Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(Constants.SVILUPPO_BASE_URL_1)
+                        .baseUrl(Constants.BASE_URL)
                         .addConverterFactory(JacksonConverterFactory.create())
                         .build();
 
